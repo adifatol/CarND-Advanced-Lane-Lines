@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import os
 import glob
+import pickle
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from tqdm import *
@@ -33,18 +34,19 @@ for i in tqdm(range(len(images))):
         img_name_with_corners = 'output_images/calib/drawChessboard/{0}'.format(img_name_only)
         res = cv2.imwrite(img_name_with_corners, with_corners)
 
-print('Undistort ...')
+img_size = img.shape[:2]
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img_size,None,None)
 
-def cal_undistort(img, objpoints, imgpoints):
-    img_size = img.shape[:2]
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img_size,None,None)
-    undist = cv2.undistort(img, mtx, dist, None, mtx)
-    return undist
+print('Undistort ...')
 
 for i in tqdm(range(len(images))):
     img_name = images[i]
     img      = mpimg.imread(img_name)
-    udst     = cal_undistort(img, objpoints, imgpoints)
+    udst     = cv2.undistort(img, mtx, dist, None, mtx)
     img_name_only = os.path.basename(img_name)
     img_name_udst = 'output_images/calib/undistorted/{0}'.format(img_name_only)
     res = cv2.imwrite(img_name_udst, udst)
+
+# Saving the calibration variables:
+with open('calib.pickle', 'wb') as f:
+    pickle.dump([mtx, dist], f)
