@@ -20,7 +20,7 @@ The goals / steps of this project are the following:
 [image5]: ./output_images/test_images/warped/test1.jpg "Warp Example"
 [image6]: ./output_images/test_images/histograms/test7.jpg "Histogram"
 [image7]: ./output_images/test_images/curvature/test7.jpg "Polynomial and curvature"
-
+[image8]: ./output_images/test_images/onroad/test1.jpg "Back on road"
 [video1]: ./project_video.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -111,14 +111,16 @@ When used on the video pipeline, the sliding window is running some checks if th
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 The curvature was calculated in the [curvature module](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/curvature.py). The deviation from the center of the lanes is calculated in the same module.
-Here is an example with the curvature values calculated and printed on the warped image:
+Here is an example with the curvature values (in meters) calculated and printed on the warped image:
 ![alt text][image7]
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+I implemented this step in the [drawonroad module](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/drawonroad.py). This module will create a new image with the found lanes drawn on it and then "unwarp" it, like in the example:
 
-![alt text][image6]
+![alt text][image8]
+
+In the [video pipeline](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/pipeline_video.py), information resulted in the previous steps (curvature radius, deviation from center, lanes were detected or not) is printed on each frame.
 
 ---
 
