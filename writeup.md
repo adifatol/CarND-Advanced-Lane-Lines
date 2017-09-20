@@ -18,10 +18,9 @@ The goals / steps of this project are the following:
 [image3]: ./output_images/test_images/comb_tresholds/combined/test1.jpg "Combined Treshold"
 [image4]: ./output_images/test_images/unwarped/test1.jpg "Warp Example Src Points"
 [image5]: ./output_images/test_images/warped/test1.jpg "Warp Example"
+[image6]: ./output_images/test_images/histograms/test7.jpg "Histogram"
+[image7]: ./output_images/test_images/curvature/test7.jpg "Polynomial and curvature"
 
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -99,13 +98,21 @@ Here is a warped image result (applied on combined tresholds):
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+In the next step I applied the ["sliding window"](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/slidewindow.py) method in order to find the lane lines.
+Initially, the sliding window algorithm starts from the points found running a histogram function in order to find the highest peaks on the binary warped image:
+![alt text][image6]
 
-![alt text][image5]
+Then I fit my lane lines with a 2nd order polynomial and plotted the result on an image (this example includes curvature radius calculations also, explained in the next point):
+
+![alt text][image7]
+
+When used on the video pipeline, the sliding window is running some checks if the previous lanes were detected correctly. If yes, the starting points are not chosen from the histogram but actually from the points that were detected in the previous frame. If the lanes are correctly detected, then the pixels calculated by the polyfit are averaged over the last 10 frames and used as the new found lanes. If the lanes are not detected correctly (checking the distance between lanes to be about ~3m), the previous lanes detected are used (from the previous frame).
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+The curvature was calculated in the [curvature module](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/curvature.py). The deviation from the center of the lanes is calculated in the same module.
+Here is an example with the curvature values calculated and printed on the warped image:
+![alt text][image7]
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
