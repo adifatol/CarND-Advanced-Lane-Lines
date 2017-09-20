@@ -1,9 +1,3 @@
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Advanced Lane Finding Project**
 
 The goals / steps of this project are the following:
@@ -35,9 +29,17 @@ The goals / steps of this project are the following:
 
 ### Writeup / README
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/writeup.md) is the writeup for this project.
 
 You're reading it!
+
+### Project Structure
+
+For this project I used python scripts only. I tried to implement the code as modular as possible so for each step in the pipeline there is a [module](https://github.com/adifatol/CarND-Advanced-Lane-Lines/tree/master/modules).
+
+I first implemented a [pipeline](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/pipeline.py) for the test images using the modules for [calibration](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/calib.py), [tresholding](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/tresholds.py), [image warping](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/warp.py) etc.
+
+The second step was to re-use the same modules in the [video pipeline]() script.
 
 ### Camera Calibration
 
