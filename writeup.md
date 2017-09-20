@@ -15,9 +15,9 @@ The goals / steps of this project are the following:
 
 [image1]: ./test_images/test1.jpg "Original"
 [image2]: ./output_images/test_images/undistorted/test1.jpg "Undistorted"
-
-[image3]: ./output_images/calib/undistorted/calibration2.jpg "Undistorted"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
+[image3]: ./output_images/test_images/comb_tresholds/combined/test1.jpg "Combined Treshold"
+[image4]: ./output_images/test_images/unwarped/test1.jpg "Warp Example Src Points"
+[image5]: ./output_images/test_images/warped/test1.jpg "Warp Example"
 
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
 [image5]: ./examples/color_fit_lines.jpg "Fit Visual"
@@ -70,39 +70,32 @@ After this (independednt of the "-c" argument), the pipeline will load these par
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+After the image was undistorted, I applied a combination of color and gradient [thresholds](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/tresholds.py) to generate a binary image (lines 47 through 54 in [pipeline.py](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/pipeline.py)). For the video pipeline the hls_select function was modified in order to include a color treshold on the L channel. Initially the function applied color threshold for the S channel only, which gave good results for the test images. The treshold on the L channel greatly improved the results on the video in the shadow areas especially. 
+
+Here's an example of my output for this step.
 
 ![alt text][image3]
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `warp()`, which is found in the [warp module](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/warp.py).  The `warp()` function takes as input an image (`combined`), which is the result of the combined tresholds from the above point.  I chose to hardcode the source and destination points by intuition and trial and error and found that the following results work well enough:
 
 ```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+    src = np.float32([[(200, 720), (570, 470), (720, 470), (1130, 720)]])
+    dst = np.float32([[(350, 720), (350, 0), (980, 0), (980, 720)]])
 ```
-
-This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 200, 720      | 350, 720      | 
+| 570, 470      | 350, 0        |
+| 720, 470      | 980, 720      |
+| 1130, 720     | 980, 0        |
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-
+Here's an example of trying to find good source points:
 ![alt text][image4]
+Here is a warped image result (applied on combined tresholds):
+![alt text][image5]
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
