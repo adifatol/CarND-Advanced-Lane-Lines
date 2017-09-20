@@ -13,12 +13,12 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./camera_cal/calibration2.jpg "Original"
-[image2]: ./output_images/calib/drawChessboard/calibration2.jpg "Chessboard Corners"
-[image3]: ./output_images/calib/undistorted/calibration2.jpg "Undistorted"
+[image1]: ./test_images/test1.jpg "Original"
+[image2]: ./output_images/test_images/undistorted/test1.jpg "Undistorted"
 
-[image2]: ./test_images/test1.jpg "Road Transformed"
+[image3]: ./output_images/calib/undistorted/calibration2.jpg "Undistorted"
 [image3]: ./examples/binary_combo_example.jpg "Binary Example"
+
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
 [image5]: ./examples/color_fit_lines.jpg "Fit Visual"
 [image6]: ./examples/example_output.jpg "Output"
@@ -61,6 +61,11 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 #### 1. Provide an example of a distortion-corrected image.
 
 To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
+![alt text][image1]
+
+The pipeline.py checks if the "-c" command line argument is passed. If this is true, the ["calib.py"](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/modules/calib.py) module is imported. This module applies the algorithm explained in the previous point in order to find the camera calibration parameters. These parameters are then saved in the [calib.pickle](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/calib.pickle) file.
+
+After this (independednt of the "-c" argument), the pipeline will load these parameters into mtx and dist variables. The cv2.undistort() function is then applied using these calibration parameters giving the folowing result:
 ![alt text][image2]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
