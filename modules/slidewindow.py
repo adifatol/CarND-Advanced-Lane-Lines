@@ -1,22 +1,31 @@
 import cv2
 import os
 import numpy as np
+from modules.sanity import *
 
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-def slidewindow(binary_warped, img_name, visual_on=True):
-    # Assuming you have created a warped binary image called "binary_warped"
-    # Take a histogram of the bottom half of the image
-    histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
+def slidewindow(binary_warped, laneTrack, img_name=""):
+    # Define conversions in x and y from pixels space to meters
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
+    avg_frames = 10 # number of frames to average
     # Create an output image to draw on and  visualize the result
     out_img = np.dstack((binary_warped, binary_warped, binary_warped))*255
-    # Find the peak of the left and right halves of the histogram
-    # These will be the starting point for the left and right lines
-    midpoint = np.int(histogram.shape[0]/2)
-    leftx_base = np.argmax(histogram[:midpoint])
-    rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+
+    if (laneTrack.detected):
+        leftx_base = laneTrack.leftLane.bestx
+        rightx_base = laneTrack.rightLane.bestx
+    else:
+        # Take a histogram of the bottom half of the image
+        histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
+        # Find the peak of the left and right halves of the histogram
+        # These will be the starting point for the left and right lines
+        midpoint = np.int(histogram.shape[0]/2)
+        leftx_base = np.argmax(histogram[:midpoint])
+        rightx_base = np.argmax(histogram[midpoint:]) + midpoint
 
     # Choose the number of sliding windows
     nwindows = 9
@@ -75,25 +84,59 @@ def slidewindow(binary_warped, img_name, visual_on=True):
     rightx = nonzerox[right_lane_inds]
     righty = nonzeroy[right_lane_inds]
 
-    # Fit a second order polynomial to each
-    left_fit = np.polyfit(lefty, leftx, 2)
-    right_fit = np.polyfit(righty, rightx, 2)
+    laneTrack.detected = True
+
+    if (len(lefty) < 1 or
+        len(leftx) < 1 or
+        len(righty) < 1 or
+        len(rightx) < 1):
+        laneTrack.detected = False
+        # Fit a second order polynomial to each
+        left_fit = laneTrack.leftLane.current_fit
+        right_fit = laneTrack.rightLane.current_fit
+        laneTrack.detected = False
+    else :
+        # Fit a second order polynomial to each
+        left_fit = np.polyfit(lefty, leftx, 2)
+        right_fit = np.polyfit(righty, rightx, 2)
 
     # Generate x and y values for plotting
     ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
     right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
 
-    if (visual_on):
+    #Check if lanes are parallel, used for sanity check
+    parallel_diff = np.abs(np.subtract(left_fit, right_fit))
+    #Minimal distance between the lanes
+    diff = np.subtract(right_fitx, left_fitx)*xm_per_pix
+    min_distance = np.amin(diff)
+    laneTrack.parallel_diff = parallel_diff
+    laneTrack.min_distance  = min_distance
 
-        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
-        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+    sanity_passed = sanity(laneTrack)
+    if (sanity_passed):
+        laneTrack.leftLane.bestx = leftx_current
+        laneTrack.rightLane.bestx = rightx_current
+        laneTrack.leftLane.current_fit = left_fit
+        if (len(laneTrack.rightLane.allx) > 0):
+            laneTrack.rightLane.allx = (right_fitx + laneTrack.rightLane.allx*avg_frames) / (avg_frames+1)
+        else:
+            laneTrack.rightLane.allx = right_fitx
+        if (len(laneTrack.leftLane.allx) > 0):
+            laneTrack.leftLane.allx = (left_fitx + laneTrack.leftLane.allx*avg_frames) / (avg_frames+1)
+        else:
+            laneTrack.leftLane.allx = left_fitx
+        laneTrack.leftLane.ally = ploty
+        laneTrack.rightLane.ally = ploty
+    else:
+        #we gonna use the old values
+        left_fitx = laneTrack.leftLane.allx
+        right_fitx = laneTrack.rightLane.allx
+        ploty = laneTrack.rightLane.ally
 
-        plt.clf()
-        plt.imshow(out_img)
-        plt.plot(left_fitx, ploty, color='yellow')
-        plt.plot(right_fitx, ploty, color='yellow')
-        plt.xlim(0, 1280)
-        plt.ylim(720, 0)
-        plt.savefig('output_images/test_images/slidewindow/plt_{}'.format(os.path.basename(img_name)))
-    return out_img, left_fitx, right_fitx, ploty
+    if (len(laneTrack.rightLane.allx) > 0):
+        right_fitx = (right_fitx + laneTrack.rightLane.allx*avg_frames) / (avg_frames+1)
+    if (len(laneTrack.leftLane.allx) > 0):
+        left_fitx = laneTrack.leftLane.allx = (left_fitx + laneTrack.leftLane.allx*avg_frames) / (avg_frames+1)
+
+    return out_img, left_fitx, right_fitx, ploty, laneTrack

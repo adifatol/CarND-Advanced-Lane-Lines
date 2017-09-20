@@ -61,6 +61,9 @@ def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi/2)):
 def hls_select(img, thresh=(0, 255)):
     hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
     s_channel = hls[:,:,2]
+    l_channel = hls[:,:,1]
+    s_binary  = (s_channel > thresh[0]) & (s_channel <= thresh[1])
+    l_binary  = (l_channel > thresh[0]) & (l_channel <= thresh[1])
     binary_output = np.zeros_like(s_channel)
-    binary_output[(s_channel > thresh[0]) & (s_channel <= thresh[1])] = 1
+    binary_output[s_binary & l_binary] = 1
     return binary_output
