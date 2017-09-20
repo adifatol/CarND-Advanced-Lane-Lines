@@ -128,7 +128,7 @@ In the [video pipeline](https://github.com/adifatol/CarND-Advanced-Lane-Lines/bl
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](https://github.com/adifatol/CarND-Advanced-Lane-Lines/blob/master/project_processed_video.mp4)
 
 ---
 
@@ -136,4 +136,8 @@ Here's a [link to my video result](./project_video.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+One of the biggest problems was that the detection was failing in areas with shadows. In order to fix this I tried to apply an average over many frames (20~30). The results were ok but the effect was still visible. Also, because of the averaging the changes in lane curvature seemed to be lagging with some fractions of a second. Then I applied a treshold on the L channel and the results improved alot, so I reduced the averaging to ~10 frames. In this way the results are smoother and the lagging is not visible.
+
+The pipeline seems to have some issues with "white" areas on the road which could be solved probably by tweaking the color treshold values. I would also try to include a hsv transformation and apply a treshold over the "V" channel.
+
+Another test that I would do (which takes a bit longer to implement) is to keep a longer history of the found lanes (~20 frames), give a confidence score based on the grade of parallelism between them, the curvature values, distance between them etc. and then do a "weighted" average where the lanes that have greater confidence score weight more than others that don't "look" so good.
